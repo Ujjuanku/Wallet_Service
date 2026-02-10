@@ -19,4 +19,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
     // Since we can't easily run seed.sql via docker volume, we will enable sync OR run a migration.
     // Recommended: synchronize: true for this "assignment level" project to ensure tables exist.
     synchronize: true,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+    retryAttempts: 10,
+    retryDelay: 3000,
 };
