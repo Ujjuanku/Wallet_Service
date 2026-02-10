@@ -1,0 +1,44 @@
+
+services:
+  db:
+    image: postgres:15
+    container_name: wallet-postgres
+    environment:
+      POSTGRES_USER: wallet
+      POSTGRES_PASSWORD: wallet
+      POSTGRES_DB: wallet_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
+
+  api:
+    build: .
+    container_name: wallet-api
+    depends_on:
+      - db
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USER: wallet
+      DATABASE_PASSWORD: wallet
+      DATABASE_NAME: wallet_db
+      DATABASE_SYNC: "true" # For dev only, to create tables before seed runs? NO. 
+      # Actually, seeding happens at DB init. Tables must exist.
+      # TypeORM synchronize: true will try to create tables.
+      # Race condition: DB Init starts -> runs seed.sql -> tables might not exist yet if TypeORM isn't managing them, or if seed runs before TypeORM connects.
+      # Standard Postgres Docker image runs /docker-entrypoint-initdb.d/ scripts ONLY on empty data directory initialization.
+      # So we need the tables to exist BEFORE the seed runs.
+      # BUT, since we are using TypeORM `synchronize: true`, the app creates tables.
+      # The Postgres seed script runs BEFORE the app starts (mostly).
+      # If the seed script runs before tables are created, it will fail.
+      # SOLUTION: The seed script should CREATE tables too, OR we rely on TypeORM to sync, and then run a seed script manually or via code.
+      # Requirement: "Provide a seed.sql file that Inserts asset types..."
+      # AND "docker-compose up --build" should start everything.
+      # Best approach for this assignment:
+      # Include Table Creation in seed.sql OR let the app sync and then have an endpoint/script to seed.
+      # However, "docker-compose.yml (API + PostgreSQL + seed script)" implies it should happen automatically.
+      # Let's put CREATE TABLE statements in `seed.sql` to be safe, so it runs on DB startup.
+      # Then TypeORM will see tables exist and just sync/validate.
+    ports:
+      - "8080:8080"
