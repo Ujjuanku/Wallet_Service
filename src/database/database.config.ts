@@ -26,13 +26,13 @@ export const databaseConfig: TypeOrmModuleOptions = {
     password: process.env.DATABASE_PASSWORD || process.env.PGPASSWORD || 'wallet',
     database: process.env.DATABASE_NAME || process.env.PGDATABASE || 'wallet_db',
     entities: [Asset, User, Wallet, Transaction, LedgerEntry],
-    // For Railway, we need schemas to be created. 
-    // Since we can't easily run seed.sql via docker volume, we will enable sync OR run a migration.
-    // Recommended: synchronize: true for this "assignment level" project to ensure tables exist.
+
+    // Seed logic needs schema
     synchronize: true,
-    // SSL is required for Railway/Heroku if using the public URL or if they enforce it.
-    // We strictly enable it if we detect we are NOT on localhost (simple heuristic) OR if env var says so.
-    ssl: (process.env.DATABASE_URL || process.env.PGHOST) && process.env.PGHOST !== 'localhost' ? { rejectUnauthorized: false } : false,
+
+    // SSL Logic for Railway (if not localhost)
+    ssl: (process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGHOST !== 'localhost')) ? { rejectUnauthorized: false } : false,
+
     retryAttempts: 10,
     retryDelay: 3000,
     logging: true, // Enable logging for debugging
