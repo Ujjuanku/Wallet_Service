@@ -22,4 +22,5 @@ export const databaseConfig: TypeOrmModuleOptions = {
     ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
     retryAttempts: 10,
     retryDelay: 3000,
+    logging: true, // Enable logging for debugging
 };

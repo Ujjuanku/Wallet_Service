@@ -79,10 +79,23 @@ async function seedData() {
 }
 
 async function bootstrap() {
+  console.log('🚀 Starting Bootstrap...');
+
   if (process.env.DATABASE_URL) {
+    console.log('🌱 DATABASE_URL found, attempting seed...');
     await seedData();
+    console.log('✅ Seeding check complete.');
+  } else {
+    console.log('⚠️ No DATABASE_URL found, skipping seed.');
   }
+
+  console.log('🏗 Creating NestJS App...');
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 8080, '0.0.0.0');
+
+  const port = process.env.PORT ?? 8080;
+  console.log(`🌍 App starting to listen on port ${port} (0.0.0.0)...`);
+
+  await app.listen(port, '0.0.0.0');
+  console.log('🚀 Server is running!');
 }
 bootstrap();
