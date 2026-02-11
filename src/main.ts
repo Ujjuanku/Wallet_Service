@@ -81,12 +81,13 @@ async function seedData() {
 async function bootstrap() {
   console.log('🚀 Starting Bootstrap...');
 
-  if (process.env.DATABASE_URL) {
-    console.log('🌱 DATABASE_URL found, attempting seed...');
+  // Seed if we have ANY valid connection info that is likely production
+  if (process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGHOST !== 'localhost')) {
+    console.log('🌱 Database connection info found, attempting seed...');
     await seedData();
     console.log('✅ Seeding check complete.');
   } else {
-    console.log('⚠️ No DATABASE_URL found, skipping seed.');
+    console.log('⚠️ No production database info found (checked DATABASE_URL and PGHOST), skipping seed.');
   }
 
   console.log('🏗 Creating NestJS App...');
